@@ -1,0 +1,190 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Scan QR Code</title>
+    <script src="https://unpkg.com/html5-qrcode/minified/html5-qrcode.min.js"></script>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 0;
+            padding: 0;
+            height: 100vh;
+            background: linear-gradient(45deg, #ffcc00, #ff4d00);
+            background-size: 400% 400%;
+            animation: gradientAnimation 5s ease infinite;
+            overflow: hidden;
+        }
+
+        @keyframes gradientAnimation {
+            0% { background-position: 0% 50%; }
+            50% { background-position: 100% 50%; }
+            100% { background-position: 0% 50%; }
+        }
+
+        .stars {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            pointer-events: none;
+        }
+
+        .star {
+            position: absolute;
+            background-color: rgba(255, 255, 255, 0.7);
+            border-radius: 50%; /* Make the stars circular */
+            animation: starAnimation 3s infinite ease-in-out;
+        }
+
+        @keyframes starAnimation {
+            0% { opacity: 0; transform: scale(0); }
+            50% { opacity: 1; transform: scale(1); }
+            100% { opacity: 0; transform: scale(0); }
+        }
+
+        .content {
+            position: absolute;
+            top: 50%;
+            left: 50%;
+            transform: translate(-50%, -50%);
+            text-align: center;
+            color: white;
+            z-index: 1;
+            backdrop-filter: blur(10px); /* Stronger blur effect */
+            padding: 20px;
+            border-radius: 10px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            width: 90%;
+            max-width: 500px;
+            background: rgba(255, 255, 255, 0.1); /* Transparent white background */
+        }
+
+        .content h1 {
+            margin-bottom: 20px;
+            font-size: 2.5em;
+        }
+
+        .content button {
+            padding: 10px 20px;
+            font-size: 1.2em;
+            border-radius: 5px;
+            background-color: #ffcc00;
+            color: black;
+            border: none;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+
+        .content button:hover {
+            background-color: #ff4d00;
+        }
+
+        .qr-code-result {
+            margin-top: 20px;
+            font-size: 1.2em;
+            color: white;
+        }
+
+        /* Mobile and tablet styles */
+        @media (max-width: 768px) {
+            .content h1 {
+                font-size: 2em;
+            }
+
+            .content button {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+        }
+
+        @media (max-width: 480px) {
+            .content h1 {
+                font-size: 1.5em;
+            }
+
+            .content button {
+                font-size: 1em;
+                padding: 8px 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="stars" id="stars-container"></div>
+
+    <div class="content">
+        <h1>Scan QR Code</h1>
+        <button id="startScan">Start Scanning</button>
+        <div id="result" class="qr-code-result"></div>
+    </div>
+
+    <script>
+        // Function to generate random stars with larger size
+        function generateStars() {
+            const starsContainer = document.getElementById('stars-container');
+            const numberOfStars = 100;  // Adjust number of stars
+
+            for (let i = 0; i < numberOfStars; i++) {
+                let star = document.createElement('div');
+                star.classList.add('star');
+                
+                // Randomize position
+                const xPos = Math.random() * 100 + '%';
+                const yPos = Math.random() * 100 + '%';
+                
+                // Randomize size between 4px and 10px
+                const size = Math.random() * 6 + 4 + 'px'; // Random size between 4px and 10px
+                star.style.width = size;
+                star.style.height = size;
+                
+                // Randomize animation delay
+                const delay = Math.random() * 2 + 's';
+                star.style.animationDelay = delay;
+
+                // Position the star and add it to the container
+                star.style.top = yPos;
+                star.style.left = xPos;
+
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Call the function to generate stars when the page loads
+        generateStars();
+
+        // Initialize the camera scan function
+        const startScanButton = document.getElementById('startScan');
+        const resultDiv = document.getElementById('result');
+        let html5QrCode;
+
+        startScanButton.addEventListener('click', () => {
+            // Initialize QR scanner with the camera
+            if (!html5QrCode) {
+                html5QrCode = new Html5Qrcode("scanner");
+            }
+
+            // Start the camera scan
+            html5QrCode.start(
+                { facingMode: "environment" },  // Use the rear camera
+                {
+                    fps: 10,    // Set frames per second for better performance
+                    qrbox: 250, // Size of the QR code detection box
+                },
+                (decodedText, decodedResult) => {
+                    // Display the QR code result
+                    resultDiv.innerHTML = `<p><strong>Scanned QR Code Data:</strong> ${decodedText}</p><p><strong>Time:</strong> ${new Date().toLocaleString()}</p>`;
+                    html5QrCode.stop();  // Stop scanning after successful scan
+                },
+                (errorMessage) => {
+                    // Handle scan errors (optional)
+                }
+            ).catch((error) => {
+                resultDiv.innerHTML = "Error starting camera scan.";
+            });
+        });
+    </script>
+</body>
+</html>
