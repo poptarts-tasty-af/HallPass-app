@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>QR Code Scanner</title>
+    <title>Hall Pass - HRHS</title>
     <style>
         body {
-            font-family: Arial, sans-serif;
+            font-family: Andalé Mono, monospace;
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(45deg, #000000, #0d00ff);
+            background: linear-gradient(45deg, #000000, #070088);
             background-size: 400% 400%;
             animation: gradientAnimation 5s ease infinite;
             overflow-y: auto;
@@ -174,7 +174,7 @@
 
     <div class="content">
         <h1>HRHS Hall Pass App</h1>
-        <p>Coded with ❤️ by Danny Lesniak with assistance from Wiley N and Riley W</p>
+        <p>Coded by Danny Lesniak with assistance from Wiley N and Riley W</p>
 
         <div class="video-container">
             <video id="video" autoplay></video>
@@ -182,7 +182,6 @@
 
         <button onclick="startCamera()">Start Camera</button>
         <p><strong>Status:</strong> <span id="status">Waiting for QR code...</span></p>
-        <p>Scan a QR code to get the details.</p>
 
         <div id="qrData"></div>
     </div>
