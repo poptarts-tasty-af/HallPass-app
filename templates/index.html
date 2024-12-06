@@ -3,14 +3,14 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Hall Pass - HRHS</title>
+    <title>QR Code Scanner</title>
     <style>
         body {
-            font-family: Andalé Mono, monospace;
+            font-family: Arial, sans-serif;
             margin: 0;
             padding: 0;
             min-height: 100vh;
-            background: linear-gradient(45deg, #000000, #070088);
+            background: linear-gradient(45deg, #000000, #0d00ff);
             background-size: 400% 400%;
             animation: gradientAnimation 5s ease infinite;
             overflow-y: auto;
@@ -30,7 +30,7 @@
             width: 100%;
             height: 100%;
             pointer-events: none;
-            z-index: -1; /* Ensure stars are behind content */
+            z-index: -1;
         }
 
         .star {
@@ -60,7 +60,7 @@
 
         .content h1 {
             margin-bottom: 20px;
-            font-size: 1.8em; /* Slightly smaller font for mobile */
+            font-size: 1.8em; 
             font-weight: bold;
             backdrop-filter: blur(10px);
             padding: 10px;
@@ -68,7 +68,7 @@
         }
 
         .content p {
-            font-size: 1.2em; /* Adjust font size for mobile */
+            font-size: 1.2em;
             margin: 10px 0;
         }
 
@@ -84,7 +84,7 @@
 
         video {
             width: 100%;
-            max-width: 100%; /* Ensure video does not overflow */
+            max-width: 100%;
             height: auto;
             border-radius: 10px;
         }
@@ -96,7 +96,7 @@
             margin-bottom: 20px;
         }
 
-        /* Glassmorphism effect for camera and button */
+
         .camera-container,
         button {
             backdrop-filter: blur(10px) saturate(180%);
@@ -107,12 +107,11 @@
             font-size: 1.2em;
             border: none;
             margin: 15px 0;
-            width: 100%; /* Make buttons full width on mobile */
-            max-width: 300px; /* Limit max width of buttons */
+            width: 100%;
+            max-width: 300px; 
             box-sizing: border-box;
         }
 
-        /* Centered and clean box for the QR data */
         #qrData {
             margin-top: 20px;
             padding: 15px;
@@ -122,13 +121,13 @@
             font-size: 1.2em;
             text-align: center;
             width: 100%;
-            max-width: 320px; /* Ensure it doesn't get too large on mobile */
+            max-width: 320px;
             margin-left: auto;
             margin-right: auto;
             box-sizing: border-box;
         }
 
-        /* Additional styles for the QR data content */
+
         #qrData p {
             margin: 8px 0;
             padding: 0;
@@ -144,27 +143,27 @@
             font-size: 1.2em;
         }
 
-        /* Mobile-only styles */
+ 
         @media (max-width: 480px) {
             .content h1 {
-                font-size: 1.6em; /* Reduce font size for small screens */
+                font-size: 1.6em;
             }
 
             .content p {
-                font-size: 1em; /* Adjust font size for mobile */
+                font-size: 1em;
             }
 
             button {
-                width: 90%; /* Make buttons take up more width on small screens */
+                width: 90%; 
             }
 
             video {
-                height: 250px; /* Smaller video size for mobile */
+                height: 250px; 
             }
 
             #qrData {
-                font-size: 1em; /* Smaller font size for QR data */
-                padding: 10px; /* Less padding */
+                font-size: 1em; 
+                padding: 10px; 
             }
         }
     </style>
@@ -174,7 +173,7 @@
 
     <div class="content">
         <h1>HRHS Hall Pass App</h1>
-        <p>Coded by Danny Lesniak with assistance from Wiley N and Riley W</p>
+        <p>type shi</p>
 
         <div class="video-container">
             <video id="video" autoplay></video>
@@ -182,6 +181,7 @@
 
         <button onclick="startCamera()">Start Camera</button>
         <p><strong>Status:</strong> <span id="status">Waiting for QR code...</span></p>
+        <p>Scan a QR code to get the details.</p>
 
         <div id="qrData"></div>
     </div>
