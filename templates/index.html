@@ -5,6 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>QR Code Scanner</title>
     <style>
+        /* Existing styles */
         body {
             font-family: Arial, sans-serif;
             margin: 0;
@@ -96,7 +97,6 @@
             margin-bottom: 20px;
         }
 
-
         .camera-container,
         button {
             backdrop-filter: blur(10px) saturate(180%);
@@ -127,7 +127,6 @@
             box-sizing: border-box;
         }
 
-
         #qrData p {
             margin: 8px 0;
             padding: 0;
@@ -143,7 +142,6 @@
             font-size: 1.2em;
         }
 
- 
         @media (max-width: 480px) {
             .content h1 {
                 font-size: 1.6em;
@@ -166,14 +164,90 @@
                 padding: 10px; 
             }
         }
-    </style>
-</head>
+
+        /* Form container with glassmorphism */
+        .form-container {
+            margin-top: 20px;
+            background: rgba(255, 255, 255, 0.1);
+            backdrop-filter: blur(8px); /* Frosted glass effect */
+            padding: 20px;
+            border-radius: 10px;
+            max-width: 400px; /* Limit the max width to prevent it from stretching too far */
+            width: 100%; /* Full width up to max-width */
+            margin-left: auto;
+            margin-right: auto;
+            border: 2px solid rgba(255, 255, 255, 0.2);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        /* Center input fields with some padding and spacing */
+        .form-container input,
+        .form-container select,
+        .form-container button {
+            width: 90%; /* Adjust width to prevent hugging the sides */
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #ccc;
+            background-color: rgba(255, 255, 255, 0.3);
+            color: white;
+            font-size: 1em;
+        }
+
+        /* Make button width slightly larger for better visual alignment */
+        button {
+            background-color: #1900ff;
+            color: white;
+            cursor: pointer;
+            width: 95%; /* Make the button take up a bit more space */
+        }
+
+        button:hover {
+            background-color: #0033cc;
+        }
+
+        /* Adjust input elements */
+        .form-container input {
+            max-width: 380px; /* Limit the input field width */
+        }
+
+        /* Adjust the select dropdown as well */
+        select {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            background-color: rgba(255, 255, 255, 0.2);
+            color: white;
+            font-size: 1em;
+            backdrop-filter: blur(8px); /* Apply frosted glass effect */
+        }
+
+        .teacher-fields {
+            display: none;
+        }
+
+        input::placeholder,
+        textarea::placeholder {
+            color: white;
+        }
+
+        /* Status text color */
+        #status {
+            color: white;
+        }
+
+ </style>
+ </head>
 <body>
     <div class="stars" id="stars"></div>
 
     <div class="content">
         <h1>HRHS Hall Pass App</h1>
-        <p>type shi</p>
+        <p>Type "shi"</p>
 
         <div class="video-container">
             <video id="video" autoplay></video>
@@ -184,19 +258,41 @@
         <p>Scan a QR code to get the details.</p>
 
         <div id="qrData"></div>
+
+        <!-- New Form Container -->
+        <div class="form-container">
+            <label for="arrivalDeparture">Arrival or Departure:</label>
+            <select id="arrivalDeparture" onchange="toggleTeacherFields()">
+                <option value="arrival">Arrival</option>
+                <option value="departure">Departure</option>
+            </select>
+
+            <div id="studentNumberDiv">
+                <label for="studentNumber">Student Number:</label>
+                <input type="text" id="studentNumber" placeholder="Enter student number">
+            </div>
+
+            <div class="teacher-fields" id="teacherFields">
+                <label for="teacherName">Teacher Name:</label>
+                <input type="text" id="teacherName" placeholder="Enter teacher name">
+
+                <label for="teacherRoom">Teacher Room Number:</label>
+                <input type="text" id="teacherRoom" placeholder="Enter teacher room number">
+            </div>
+            <button onclick="submitData()">Submit</button>
+        </div>
     </div>
 
     <script>
-        function createStars() {
-            const starsContainer = document.getElementById('stars');
-            for (let i = 0; i < 50; i++) {
-                const star = document.createElement('div');
-                star.classList.add('star');
-                star.style.top = `${Math.random() * 100}%`;
-                star.style.left = `${Math.random() * 100}%`;
-                star.style.animationDuration = `${Math.random() * 2 + 2}s`;
-                star.style.animationDelay = `${Math.random() * 3}s`;
-                starsContainer.appendChild(star);
+        // Toggle visibility of teacher fields based on Arrival/Departure
+        function toggleTeacherFields() {
+            const arrivalDeparture = document.getElementById('arrivalDeparture').value;
+            const teacherFields = document.getElementById('teacherFields');
+
+            if (arrivalDeparture === 'departure') {
+                teacherFields.style.display = 'block';
+            } else {
+                teacherFields.style.display = 'none';
             }
         }
 
@@ -218,6 +314,55 @@
                 console.error('Error accessing camera: ', error);
                 document.getElementById('status').textContent = 'Failed to access camera.';
             }
+        }
+
+        // Function to handle the form submission
+        function submitData() {
+            const studentNumber = document.getElementById('studentNumber').value;
+            const teacherName = document.getElementById('teacherName').value;
+            const teacherRoom = document.getElementById('teacherRoom').value;
+            const arrivalDeparture = document.getElementById('arrivalDeparture').value;
+            const qrScanData = document.getElementById('qrData').innerText;
+
+            // Collect data to be sent as JSON
+            const formData = {
+                studentNumber: studentNumber,
+                teacherName: teacherName,
+                teacherRoom: teacherRoom,
+                arrivalDeparture: arrivalDeparture,
+                qrScanData: qrScanData
+            };
+
+            // Remove teacher data if it's not relevant (Arrival case)
+            if (arrivalDeparture === 'arrival') {
+                delete formData.teacherName;
+                delete formData.teacherRoom;
+            }
+
+            // Send the data to the backend
+            fetch('/submit', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);  // Show the success message
+                resetForm();  // Clear the form after submission
+            })
+            .catch(error => {
+                console.error('Error submitting data:', error);
+            });
+        }
+
+        // Function to reset the form fields
+        function resetForm() {
+            document.getElementById('studentNumber').value = '';
+            document.getElementById('teacherName').value = '';
+            document.getElementById('teacherRoom').value = '';
+            document.getElementById('arrivalDeparture').value = 'arrival';
+            document.getElementById('qrData').innerHTML = '';
+            document.getElementById('status').textContent = 'Waiting for QR code...';
         }
 
         let scannedTime = null;
@@ -272,9 +417,95 @@
                 document.getElementById('status').textContent = 'Scanning for QR Code...';
             }
         }
+        function submitData() {
+            const studentNumber = document.getElementById('studentNumber').value;
+            const teacherName = document.getElementById('teacherName').value;
+            const teacherRoom = document.getElementById('teacherRoom').value;
+            const arrivalDeparture = document.getElementById('arrivalDeparture').value;
+            const qrScanData = document.getElementById('qrData').innerText;
 
-        setInterval(scanQRCode, 500);
-        createStars();
+            // Collect data to be sent as JSON
+            const formData = {
+                studentNumber: studentNumber,
+                teacherName: teacherName,
+                teacherRoom: teacherRoom,
+                arrivalDeparture: arrivalDeparture,
+                qrScanData: qrScanData
+            };
+
+            // Remove teacher data if it's not relevant (Arrival case)
+            if (arrivalDeparture === 'arrival') {
+                delete formData.teacherName;
+                delete formData.teacherRoom;
+            }
+
+            // Send the data to the backend
+            fetch('/submit', {
+                method: 'POST',
+                body: JSON.stringify(formData),
+                headers: { 'Content-Type': 'application/json' }
+            })
+            .then(response => response.json())
+            .then(data => {
+                alert(data.message);  // Show the success message
+                resetForm();  // Clear the form after submission
+            })
+            .catch(error => {
+                console.error('Error submitting data:', error);
+            });
+        }
+
+        function resetForm() {
+            document.getElementById('studentNumber').value = '';
+            document.getElementById('teacherName').value = '';
+            document.getElementById('teacherRoom').value = '';
+            document.getElementById('arrivalDeparture').value = 'arrival';
+            document.getElementById('qrData').innerHTML = '';
+            document.getElementById('status').textContent = 'Waiting for QR code...';
+        }
+        // Function to fetch and display current departures
+        function fetchDepartedStudents() {
+            fetch('/departed_students')
+                .then(response => response.json())
+                .then(data => {
+                    const departedList = document.getElementById('departedList');
+                    departedList.innerHTML = '';  // Clear existing list
+                    data.departed.forEach(student => {
+                        const li = document.createElement('li');
+                        li.textContent = `Student ${student} has departed`;
+                        departedList.appendChild(li);
+                    });
+                })
+                .catch(error => {
+                    console.error('Error fetching departed students:', error);
+                });
+        }
+        
+        function createStars() {
+            const starsContainer = document.getElementById('stars');
+            const numberOfStars = 100; // Number of stars to generate
+            const width = window.innerWidth; // Get screen width
+            const height = window.innerHeight; // Get screen height
+
+            for (let i = 0; i < numberOfStars; i++) {
+                const star = document.createElement('div');
+                star.classList.add('star');
+
+                // Set random positions and animation durations for the stars
+                star.style.left = `${Math.random() * width}px`;
+                star.style.top = `${Math.random() * height}px`;
+                star.style.animationDuration = `${Math.random() * 2 + 1}s`;
+
+                // Append the star to the stars container
+                starsContainer.appendChild(star);
+            }
+        }
+
+        // Fetch the list periodically
+        setInterval(fetchDepartedStudents, 5000);
+        setInterval(scanQRCode, 500);  // Keep scanning QR codes continuously
+        createStars();  // Add stars to background
+
     </script>
 
     <script src="https://cdn.jsdelivr.net/npm/jsqr/dist/jsQR.js"></script>
