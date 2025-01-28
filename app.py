@@ -1,10 +1,14 @@
 import os
 import json
+import json
 from flask import Flask, render_template, request, jsonify
 from pyzxing import BarCodeReader
 from datetime import datetime
 
 app = Flask(__name__)
+
+BASE_UPLOAD_FOLDER = 'hallpasses'
+os.makedirs(BASE_UPLOAD_FOLDER, exist_ok=True)
 
 BASE_UPLOAD_FOLDER = 'hallpasses'
 os.makedirs(BASE_UPLOAD_FOLDER, exist_ok=True)
@@ -20,22 +24,25 @@ os.makedirs(CURRENT_STATUS_FOLDER, exist_ok=True)
 
 STUDENTS_FILE_PATH = os.path.join(CURRENT_STATUS_FOLDER, 'students.json')
 
-
-# Allowed file extensions for QR code image uploads
 ALLOWED_EXTENSIONS = {'png', 'jpg', 'jpeg', 'gif'}
 
-# Function to check if a file extension is valid
 def allowed_file(filename):
     return '.' in filename and filename.rsplit('.', 1)[1].lower() in ALLOWED_EXTENSIONS
 
-# Read student status from students.json
 def read_student_status():
     if os.path.exists(STUDENTS_FILE_PATH):
-        with open(STUDENTS_FILE_PATH, 'r') as file:
-            return json.load(file)
+        try:
+            with open(STUDENTS_FILE_PATH, 'r') as file:
+                if file.read():
+                    file.seek(0)
+                    return json.load(file)
+                else:
+                    return {}
+        except json.JSONDecodeError:
+            print(f"Error: JSON in {STUDENTS_FILE_PATH} is corrupted.")
+            return {}
     return {}
 
-# Save student status to students.json
 def save_student_status(student_status):
     with open(STUDENTS_FILE_PATH, 'w') as file:
         json.dump(student_status, file, indent=4)
@@ -83,15 +90,35 @@ def scan_qr_code():
 
     return render_template('scan_result.html', teacher=teacher, classroom=classroom, timestamp=scan_time)
 
-# Function to handle hall pass data and update the student status
 def save_hallpass_data(student_number, data):
     today_date = datetime.now().strftime('%m-%d-%Y')
     date_folder = os.path.join(BASE_UPLOAD_FOLDER, today_date)
     os.makedirs(date_folder, exist_ok=True)
     file_path = os.path.join(date_folder, f'{student_number}.json')
 
+    # Check if the file exists
+    if os.path.exists(file_path):
+        with open(file_path, 'r') as json_file:
+            try:
+                # Attempt to load the existing data
+                existing_data = json.load(json_file)
+
+                # If the existing data is not a list, make it a list
+                if not isinstance(existing_data, list):
+                    existing_data = [existing_data]
+            except json.JSONDecodeError:
+                # If JSON is corrupted or empty, initialize as an empty list
+                existing_data = []
+    else:
+        # If the file doesn't exist, initialize it as an empty list
+        existing_data = []
+
+    # Append the new data to the existing data
+    existing_data.append(data)
+
+    # Save the updated data back to the file
     with open(file_path, 'w') as json_file:
-        json.dump(data, json_file, indent=4)
+        json.dump(existing_data, json_file, indent=4)
 
 @app.route('/submit', methods=['POST'])
 def submit_hallpass():
@@ -109,26 +136,42 @@ def submit_hallpass():
         'time': datetime.now().strftime('%Y-%m-%d %H:%M:%S')
     }
 
-    # Handle the arrival or departure logic
+    # Read the existing student status from the students.json file
     student_status = read_student_status()
 
     if arrival_departure == 'departure':
-        # Add the student number to the departure list
+        # Add the student to the status as 'departed'
         student_status[student_number] = 'departed'
+
+        # Save the updated student status
+        save_student_status(student_status)
+
+        # Save the hallpass data for the departure
+        save_hallpass_data(student_number, {
+            'teacherName': teacher_name,
+            'teacherRoom': teacher_room,
+            'departureTime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'qrScanData': qr_scan_data
+        })
+        
     elif arrival_departure == 'arrival':
-        # Remove the student number from the departure list
+        # Remove the student from the status if they are arriving
         if student_number in student_status:
             del student_status[student_number]
+            # Save the updated student status after removal
+            save_student_status(student_status)
 
-    # Save updated student status
-    save_student_status(student_status)
-
-    # Save hall pass data
-    save_hallpass_data(student_number, hallpass_data)
+        # Save the hallpass data for the arrival
+        save_hallpass_data(student_number, {
+            'teacherName': teacher_name,
+            'teacherRoom': teacher_room,
+            'arrivalTime': datetime.now().strftime('%Y-%m-%d %H:%M:%S'),
+            'qrScanData': qr_scan_data
+        })
 
     return jsonify({"status": "success", "message": "Hall pass data saved."})
 
-
 if __name__ == '__main__':
+    context = ('cert.pem', 'key.pem')
     context = ('cert.pem', 'key.pem')
     app.run(host='0.0.0.0', port=8000, debug=True)
