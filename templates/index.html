@@ -142,6 +142,7 @@
             font-size: 1.2em;
         }
 
+
         @media (max-width: 480px) {
             .content h1 {
                 font-size: 1.6em;
@@ -165,15 +166,14 @@
             }
         }
 
-        /* Form container with glassmorphism */
         .form-container {
             margin-top: 20px;
             background: rgba(255, 255, 255, 0.1);
-            backdrop-filter: blur(8px); /* Frosted glass effect */
+            backdrop-filter: blur(8px);
             padding: 20px;
             border-radius: 10px;
-            max-width: 400px; /* Limit the max width to prevent it from stretching too far */
-            width: 100%; /* Full width up to max-width */
+            max-width: 400px; 
+            width: 100%;
             margin-left: auto;
             margin-right: auto;
             border: 2px solid rgba(255, 255, 255, 0.2);
@@ -182,11 +182,10 @@
             align-items: center;
         }
 
-        /* Center input fields with some padding and spacing */
         .form-container input,
         .form-container select,
         .form-container button {
-            width: 90%; /* Adjust width to prevent hugging the sides */
+            width: 90%; 
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
@@ -196,35 +195,78 @@
             font-size: 1em;
         }
 
-        /* Make button width slightly larger for better visual alignment */
         button {
             background-color: #1900ff;
-            color: white;
+            color: rgb(88, 88, 88, 0.3);
             cursor: pointer;
-            width: 95%; /* Make the button take up a bit more space */
+            width: 95%;
         }
 
         button:hover {
             background-color: #0033cc;
         }
 
-        /* Adjust input elements */
         .form-container input {
-            max-width: 380px; /* Limit the input field width */
+            max-width: 380px;
         }
 
-        /* Adjust the select dropdown as well */
         select {
             width: 90%;
             padding: 10px;
             margin: 10px 0;
             border-radius: 5px;
-            border: 1px solid rgba(255, 255, 255, 0.2);
-            background-color: rgba(255, 255, 255, 0.2);
-            color: white;
+            border: 1px solid #cccccc; /* Light border for contrast */
+            background-color: #1a1a1a; /* Dark background for dropdown */
+            color: white; /* Text color */
             font-size: 1em;
-            backdrop-filter: blur(8px); /* Apply frosted glass effect */
+            appearance: none; /* Cross-browser styling */
+            -webkit-appearance: none; /* iOS-specific styling */
         }
+
+        select:focus {
+            outline: none; /* Remove default focus outline */
+            border-color: #007bff; /* Add a focus border for accessibility */
+        }
+
+        input, button {
+            width: 90%;
+            padding: 10px;
+            margin: 10px 0;
+            border-radius: 5px;
+            border: 1px solid #cccccc; /* Light border */
+            background-color: #333333; /* Dark button background */
+            color: white; /* Ensure text is visible */
+            font-size: 1em;
+            cursor: pointer;
+        }
+
+        button {
+            background-color: #0056b3; /* Blue button background */
+            color: white; /* Text color */
+            font-weight: bold;
+            border: none;
+        }
+
+        button:hover {
+            background-color: #003d80; /* Darker blue on hover */
+        }
+
+        button:active {
+            background-color: #00264d; /* Even darker when clicked */
+        }
+
+        body {
+            background-color: #1a1a1a; /* Dark background for the page */
+            color: white; /* Default text color */
+            font-family: Arial, sans-serif; /* Simple, readable font */
+        }
+
+        @media (max-width: 480px) {
+            select, input, button {
+                font-size: 0.9em; /* Adjust for smaller screens */
+            }
+        }
+
 
         .teacher-fields {
             display: none;
@@ -234,8 +276,6 @@
         textarea::placeholder {
             color: white;
         }
-
-        /* Status text color */
         #status {
             color: white;
         }
@@ -247,7 +287,7 @@
 
     <div class="content">
         <h1>HRHS Hall Pass App</h1>
-        <p>Type "shi"</p>
+        <p>Programmed by Danny Lesniak with assistance from Riley Williams and Wiley Niedermier</p>
 
         <div class="video-container">
             <video id="video" autoplay></video>
@@ -259,7 +299,6 @@
 
         <div id="qrData"></div>
 
-        <!-- New Form Container -->
         <div class="form-container">
             <label for="arrivalDeparture">Arrival or Departure:</label>
             <select id="arrivalDeparture" onchange="toggleTeacherFields()">
@@ -284,7 +323,6 @@
     </div>
 
     <script>
-        // Toggle visibility of teacher fields based on Arrival/Departure
         function toggleTeacherFields() {
             const arrivalDeparture = document.getElementById('arrivalDeparture').value;
             const teacherFields = document.getElementById('teacherFields');
@@ -292,9 +330,12 @@
             if (arrivalDeparture === 'departure') {
                 teacherFields.style.display = 'block';
             } else {
-                teacherFields.style.display = 'none';
+                teacherFields.style.display = 'none';l
+                document.getElementById('teacherName').value = '';
+                document.getElementById('teacherRoom').value = '';
             }
         }
+
 
         async function startCamera() {
             try {
@@ -316,53 +357,18 @@
             }
         }
 
-        // Function to handle the form submission
-        function submitData() {
-            const studentNumber = document.getElementById('studentNumber').value;
-            const teacherName = document.getElementById('teacherName').value;
-            const teacherRoom = document.getElementById('teacherRoom').value;
-            const arrivalDeparture = document.getElementById('arrivalDeparture').value;
-            const qrScanData = document.getElementById('qrData').innerText;
-
-            // Collect data to be sent as JSON
-            const formData = {
-                studentNumber: studentNumber,
-                teacherName: teacherName,
-                teacherRoom: teacherRoom,
-                arrivalDeparture: arrivalDeparture,
-                qrScanData: qrScanData
-            };
-
-            // Remove teacher data if it's not relevant (Arrival case)
-            if (arrivalDeparture === 'arrival') {
-                delete formData.teacherName;
-                delete formData.teacherRoom;
-            }
-
-            // Send the data to the backend
-            fetch('/submit', {
-                method: 'POST',
-                body: JSON.stringify(formData),
-                headers: { 'Content-Type': 'application/json' }
-            })
-            .then(response => response.json())
-            .then(data => {
-                alert(data.message);  // Show the success message
-                resetForm();  // Clear the form after submission
-            })
-            .catch(error => {
-                console.error('Error submitting data:', error);
-            });
-        }
-
-        // Function to reset the form fields
         function resetForm() {
             document.getElementById('studentNumber').value = '';
             document.getElementById('teacherName').value = '';
             document.getElementById('teacherRoom').value = '';
-            document.getElementById('arrivalDeparture').value = 'arrival';
+            document.getElementById('arrivalDeparture').value = 'arrival';  // Ensures it switches back to arrival
             document.getElementById('qrData').innerHTML = '';
             document.getElementById('status').textContent = 'Waiting for QR code...';
+
+            document.getElementById('teacherFields').style.display = 'none';
+
+            document.getElementById('teacherName').value = '';
+            document.getElementById('teacherRoom').value = '';
         }
 
         let scannedTime = null;
@@ -417,14 +423,15 @@
                 document.getElementById('status').textContent = 'Scanning for QR Code...';
             }
         }
+
         function submitData() {
+            console.log("Submit button clicked!");
             const studentNumber = document.getElementById('studentNumber').value;
             const teacherName = document.getElementById('teacherName').value;
             const teacherRoom = document.getElementById('teacherRoom').value;
             const arrivalDeparture = document.getElementById('arrivalDeparture').value;
             const qrScanData = document.getElementById('qrData').innerText;
 
-            // Collect data to be sent as JSON
             const formData = {
                 studentNumber: studentNumber,
                 teacherName: teacherName,
@@ -433,13 +440,13 @@
                 qrScanData: qrScanData
             };
 
-            // Remove teacher data if it's not relevant (Arrival case)
             if (arrivalDeparture === 'arrival') {
                 delete formData.teacherName;
                 delete formData.teacherRoom;
             }
 
-            // Send the data to the backend
+            console.log("Form data to submit:", formData);
+
             fetch('/submit', {
                 method: 'POST',
                 body: JSON.stringify(formData),
@@ -447,64 +454,61 @@
             })
             .then(response => response.json())
             .then(data => {
-                alert(data.message);  // Show the success message
-                resetForm();  // Clear the form after submission
+                alert(data.message);
+                resetForm();
             })
             .catch(error => {
                 console.error('Error submitting data:', error);
             });
         }
 
+
         function resetForm() {
             document.getElementById('studentNumber').value = '';
             document.getElementById('teacherName').value = '';
             document.getElementById('teacherRoom').value = '';
-            document.getElementById('arrivalDeparture').value = 'arrival';
             document.getElementById('qrData').innerHTML = '';
             document.getElementById('status').textContent = 'Waiting for QR code...';
         }
-        // Function to fetch and display current departures
-        function fetchDepartedStudents() {
-            fetch('/departed_students')
-                .then(response => response.json())
-                .then(data => {
-                    const departedList = document.getElementById('departedList');
-                    departedList.innerHTML = '';  // Clear existing list
-                    data.departed.forEach(student => {
-                        const li = document.createElement('li');
-                        li.textContent = `Student ${student} has departed`;
-                        departedList.appendChild(li);
-                    });
-                })
-                .catch(error => {
-                    console.error('Error fetching departed students:', error);
-                });
-        }
+
+  //      function fetchDepartedStudents() {
+    //        fetch('/departed_students')
+      //          .then(response => response.json())
+        //        .then(data => {
+          //          const departedList = document.getElementById('departedList');
+            //        departedList.innerHTML = '';
+              //      data.departed.forEach(student => {
+                //        const li = document.createElement('li');
+                  //      li.textContent = `Student ${student} has departed`;
+                    //    departedList.appendChild(li);
+                    //});
+                //})
+                //.catch(error => {
+                  //  console.error('Error fetching departed students:', error);
+                //});
+        //}
         
         function createStars() {
             const starsContainer = document.getElementById('stars');
-            const numberOfStars = 100; // Number of stars to generate
-            const width = window.innerWidth; // Get screen width
-            const height = window.innerHeight; // Get screen height
+            const numberOfStars = 100; 
+            const width = window.innerWidth;
+            const height = window.innerHeight;
 
             for (let i = 0; i < numberOfStars; i++) {
                 const star = document.createElement('div');
                 star.classList.add('star');
 
-                // Set random positions and animation durations for the stars
                 star.style.left = `${Math.random() * width}px`;
                 star.style.top = `${Math.random() * height}px`;
                 star.style.animationDuration = `${Math.random() * 2 + 1}s`;
 
-                // Append the star to the stars container
                 starsContainer.appendChild(star);
             }
         }
 
-        // Fetch the list periodically
-        setInterval(fetchDepartedStudents, 5000);
-        setInterval(scanQRCode, 500);  // Keep scanning QR codes continuously
-        createStars();  // Add stars to background
+//      setInterval(fetchDepartedStudents, 5000);
+        setInterval(scanQRCode, 500); 
+        createStars();
 
     </script>
 
